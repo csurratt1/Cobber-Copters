@@ -12,7 +12,7 @@
  * - Good for room temperature/humidity monitoring, weather stations, etc.
  * 
  * Hardware Requirements:
- * - Arduino board (Teensy, Uno, Nano, etc.)
+ * - Arduino board (Teensy, Pico)
  * - DHT11 temperature/humidity sensor module
  * - 3 wires: Power (VCC/+), Ground (GND/-), and Data (Signal)
  * 
@@ -49,6 +49,22 @@ DHT dht(DHTPIN, DHTTYPE);
  * 
  * This function initializes the communication systems so we can
  * talk to both the computer and the DHT11 sensor.
+ */
+void setup() {
+  // Initialize serial communication with the computer
+  // 9600 = baud rate (bits per second) - a standard speed for Arduino projects
+  // This allows us to see sensor readings in the Serial Monitor window
+  Serial.begin(9600);
+  
+  // Initialize the DHT11 sensor
+  // This prepares the sensor for reading and sets up the timing requirements
+  // The DHT11 uses a specific timing protocol to send data
+  dht.begin();
+  
+  // Optional: Print a startup message (uncomment next line if desired)
+  // Serial.println("DHT11 Sensor initialized. Reading temperature and humidity...");
+}
+
 /**
  * loop() - Runs continuously after setup() completes
  * 
@@ -61,7 +77,6 @@ void loop() {
   // ========================================
   
   // Read humidity value from the sensor
-  // 'float' means decimal number (e.g., 45.5%)
   // Humidity = amount of water vapor in the air (0-100%)
   float h = dht.readHumidity();
   
@@ -78,7 +93,7 @@ void loop() {
   // 'isnan' = "is Not a Number" - checks if the reading is invalid
   // If either reading failed, display an error message
   if (isnan(h) || isnan(t)) {
-    Serial.println("⚠ Sensor read failed - check wiring and connections!");
+    Serial.println("Sensor read failed");
     // Possible causes:
     // - Loose wire connection
     // - Wrong pin number in DHTPIN
@@ -116,21 +131,5 @@ void loop() {
   delay(2000);
   
   // After this delay, the loop() function automatically starts over from the top
-
-void loop() {
-  float h = dht.readHumidity();
-  float t = dht.readTemperature();
-
-  if (isnan(h) || isnan(t)) {
-    Serial.println("Sensor read failed");
-  } else {
-    Serial.print("Humidity: ");
-    Serial.print(h);
-    Serial.print(" %  |  Temp: ");
-    Serial.print(t);
-    Serial.println(" °C");
-  }
-
-  delay(2000);
 }
 
