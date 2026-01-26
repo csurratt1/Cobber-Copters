@@ -33,11 +33,11 @@ void setup() {
   tft.updateScreen();
 
   // ---- I2C INIT ----
-  Wire.begin();
-  Wire.setClock(100000);   // 1 MHz REQUIRED for MLX90640
+  Wire1.begin();
+  Wire1.setClock(1000000);   // 1 MHz REQUIRED for MLX90640
 
   // ---- MLX INIT ----
-  if (!mlx.begin(MLX90640_I2CADDR_DEFAULT, &Wire)) {
+  if (!mlx.begin(MLX90640_I2CADDR_DEFAULT, &Wire1)) {
     Serial.println("❌ MLX90640 NOT FOUND");
     tft.fillScreen(ILI9341_RED);
     tft.setCursor(20, 100);
@@ -48,21 +48,27 @@ void setup() {
 
   Serial.println("✅ MLX90640 detected");
 
-  mlx.setMode(MLX90640_CHESS);
+mlx.setMode(MLX90640_INTERLEAVED);
   mlx.setResolution(MLX90640_ADC_18BIT);
   mlx.setRefreshRate(MLX90640_8_HZ);
 
   tft.fillScreen(ILI9341_BLACK);
   tft.updateScreen();
+  delay(200);
 }
 
 // ================= LOOP =================
 void loop() {
+Serial.println("Loop start");
 
   if (!mlx.getFrame(frame)) {
     Serial.println("❌ Frame read failed");
     return;
   }
+
+  Serial.print("Center pixel: ");
+  Serial.println(frame[12 * 32 + 16]);
+
 
   // ---- FIND MIN / MAX ----
   float minT = 1000, maxT = -1000;
