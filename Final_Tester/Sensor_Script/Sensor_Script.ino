@@ -5,6 +5,9 @@
 #define DHTTYPE DHT11    // CNT5 behaves like a DHT11
 #define TRIG_PIN 14
 #define ECHO_PIN 15  
+#include  <Adafruit_BMP280.h>
+
+Adafruit_BMP280 bmp; // I2C Interface
 
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -14,6 +17,18 @@ void setup() {
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
 
+
+  if  (!bmp.begin()) {
+    Serial.println(F("Could not find a valid BMP280 sensor,  check wiring!"));
+    while (1);
+  }
+
+  /* Default settings from datasheet.  */
+  bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
+                  Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
+                  Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
+                  Adafruit_BMP280::FILTER_X16,      /* Filtering. */
+                  Adafruit_BMP280::STANDBY_MS_500);  /* Standby time. */
 
   // Give the sensor time to stabilize
   delay(2000);
@@ -47,6 +62,23 @@ Serial.println(" cm");
   return distance_cm;
 }
 
+void readBMP280(){
+  Serial.print(F("Temperature  = "));
+    Serial.print(bmp.readTemperature());
+    Serial.println(" *C");
+
+    Serial.print(F("Pressure = "));
+    Serial.print(bmp.readPressure()/100);  //displaying the Pressure in hPa, you can change the unit
+    Serial.println("  hPa");
+
+    Serial.print(F("Approx altitude = "));
+    Serial.print(bmp.readAltitude(1019.66));  //The "1019.66" is the pressure(hPa) at sea level in day in your region
+    Serial.println("  m");                    //If you don't know it, modify it until you get your current  altitude
+
+    Serial.println();
+    delay(2000);
+}
+
 void readDHT() {
   float h = dht.readHumidity();
   float t = dht.readTemperature();
@@ -69,6 +101,7 @@ void readDHT() {
 void loop() {
   readDHT();
   readUltrasonic();
+  readBMP280();
 
   delay(2000);  // DHT11 must be read slowly
 }
